@@ -18,6 +18,8 @@ jobs:
             args: '-Dscan.tag.baseline-transforms'
           - cache: 'transforms'
             args: '-Dscan.tag.transformCachingDisabled -Dorg.gradle.internal.transform-caching-disabled'
+          - cache: 'transforms'
+            args: '-Dscan.tag.transformCachingDisabled-selected -Dorg.gradle.internal.transform-caching-disabled=com.android.build.gradle.internal.dependency.ExtractJniTransform,com.android.build.gradle.internal.dependency.AarResourcesCompilerTransform,com.android.build.gradle.internal.dependency.LibrarySymbolTableTransform,com.android.build.gradle.internal.dependency.EnumerateClassesTransform,org.jetbrains.kotlin.gradle.internal.transforms.ClasspathEntrySnapshotTransform'
           - cache: 'kotlin-dsl'
             args: '-Dscan.tag.baseline-kotlin-dsl'
           - cache: 'kotlin-dsl'
@@ -46,7 +48,7 @@ jobs:
           echo "Test caches/*/$cache removal with $args"
 
           echo "Running build once to fully populate Gradle User Home"
-          ./gradlew ${{ matrix.task }} -Dscan.tag.remote-cache-experiment-init --no-daemon --no-configuration-cache -Ddevelocity.deprecation.muteWarnings=true -Dgradle.enterprise.url=https://ge.solutions-team.gradle.com/ -Dorg.gradle.dependency.verification=lenient 
+          ./gradlew ${{ matrix.task }} -Dscan.tag.remote-cache-experiment-init --no-daemon --no-configuration-cache -Ddevelocity.deprecation.muteWarnings=true -Dgradle.enterprise.url=https://ge.solutions-team.gradle.com/ -Dorg.gradle.dependency.verification=lenient --build-cache
           ./gradlew --stop
   
           echo "Removing $cache from $homeDir/caches"
@@ -57,4 +59,4 @@ jobs:
           rm -rf ~/.gradle/caches/build-cache-1
 
           echo "Running build again with --${args}"
-          ./gradlew ${{ matrix.task }} --no-configuration-cache -Ddevelocity.deprecation.muteWarnings=true -Dscan.uploadInBackground=false -Dgradle.enterprise.url=https://ge.solutions-team.gradle.com -Dorg.gradle.dependency.verification=lenient $args
+          ./gradlew ${{ matrix.task }} --no-configuration-cache -Ddevelocity.deprecation.muteWarnings=true -Dscan.uploadInBackground=false -Dgradle.enterprise.url=https://ge.solutions-team.gradle.com -Dorg.gradle.dependency.verification=lenient --build-cache $args

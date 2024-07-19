@@ -6,6 +6,37 @@ pluginManagement {
   }
   includeBuild("build-logic")
 }
+
+plugins {
+  id("com.gradle.develocity") version "3.17.5"
+  id("com.gradle.common-custom-user-data-gradle-plugin") version "2.0.2"
+}
+
+val isCI = providers.environmentVariable("CI").isPresent
+
+develocity {
+  server = "https://ge.solutions-team.gradle.com"
+  buildScan {
+    uploadInBackground = !isCI
+    publishing.onlyIf { it.isAuthenticated }
+    obfuscation {
+      ipAddresses { addresses -> addresses.map { "0.0.0.0" } }
+    }
+  }
+}
+
+buildCache {
+  local {
+    isEnabled = true
+  }
+
+  remote(develocity.buildCache) {
+    isEnabled = true
+    val accessKey = System.getenv("DEVELOCITY_ACCESS_KEY")
+    isPush = isCI && !accessKey.isNullOrEmpty()
+  }
+}
+
 dependencyResolutionManagement {
   repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
   repositories {
